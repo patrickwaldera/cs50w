@@ -1,0 +1,158 @@
+{% extends "mypasswords/_layout.html" %}
+{% load static %}
+
+{% block head %}
+<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+{% endblock %}
+
+{% block title %}My Passwords{% endblock title %}
+
+{% block body %}
+    <section class="content">
+        <h2>NEW RECORD</span></h2>
+        <div class="box-record">
+            <div class="new-record" id="new-record">
+            </div>
+        </div>
+    </section>
+
+    <script type="text/babel">
+
+        class App extends React.Component {   
+
+            state = {
+                recordType: "note",
+                name: "",
+                login: "",
+                password: "",
+                link: "",
+                content: "",
+            };
+            
+            render() {
+                if (this.state.recordType == "password") {
+                    return (
+                        <form  onSubmit={this.submitPassword}>
+                            <label for="recordtype">Record type:</label>
+                            <select onChange={this.handleType} name="recordtype" id="recordtype">
+                                <option value="note">Note</option>
+                                <option value="password">Password</option>
+                            </select>
+                            <p><input type="text" name="" id="" placeholder="App Name" value="" onChange={this.handleChange('name')} value={this.state.name}/></p>
+                            <p><input type="text" name="" id="" placeholder="Login" onChange={this.handleChange('login')} value={this.state.login}/></p>
+                            <p><input type="text" name="" id="" placeholder="Password" onChange={this.handleChange('password')} value={this.state.password}/></p>
+                            <p><input type="text" name="" id="" placeholder="Link" onChange={this.handleChange('link')} value={this.state.link}/></p>
+                            <p><input
+                                type="submit"
+                                value="Submit"
+                                disabled={this.state.name.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.login.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.password.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false || this.state.link.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false}
+                                /></p>           
+                        </form>
+                    );
+                }
+                else {
+                    return (
+                        <form onSubmit={this.submitNote}>
+                            <label for="recordtype">Record type:</label>
+                            <select onChange={this.handleType} name="recordtype" id="recordtype">
+                                <option value="note">Note</option>
+                                <option value="password">Password</option>
+                            </select>
+                            <p><input type="text" name="" id="" placeholder="Name" onChange={this.handleChange('name')} value={this.state.name}/></p>
+                            <p><textarea cols="60" placeholder="Content" onChange={this.handleChange('content')} value={this.state.content}></textarea></p>
+                            <p><input 
+                                type="submit" 
+                                value="Submit"
+                                disabled={this.state.name.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.content.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false}
+                                /></p>              
+                        </form>
+                    );
+                }
+
+            }
+
+            submitPassword = (event) => {
+
+                fetch(`api/create/password`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: this.state.name,
+                        login: this.state.login,
+                        password: this.state.password,
+                        link: this.state.link
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+
+                    console.log(data)
+                    
+                    this.setState({
+                        name: "",
+                        login: "",
+                        password: "",
+                        link: "",
+                        content: ""})
+
+                    window.location.href = '{% url 'home' %}'
+                })
+                .catch(error => console.log(error));
+
+                event.preventDefault();
+            }
+
+            submitNote = (event) => {
+
+                fetch(`api/create/note`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        name: this.state.name,
+                        content: this.state.content
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+
+                    console.log(data)
+                    
+                    this.setState({
+                        name: "",
+                        login: "",
+                        password: "",
+                        link: "",
+                        content: ""})
+
+                    window.location.href = '{% url 'home' %}'
+                })
+                .catch(error => console.log(error));
+
+                event.preventDefault();
+            }
+
+            handleType = (event) => {
+                this.setState({
+                    recordType: event.target.value,
+                    name: "",
+                    login: "",
+                    password: "",
+                    link: "",
+                    content: ""})
+            }
+
+            handleChange(prop) {
+                return (event) => {
+                    this.setState({ [prop]: event.target.value })
+                }
+            }
+
+        }
+
+        ReactDOM.render(
+            <App />,
+            document.querySelector('#new-record')
+        );
+
+    </script>
+{% endblock body %}

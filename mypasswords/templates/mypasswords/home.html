@@ -1,0 +1,369 @@
+{% extends "mypasswords/_layout.html" %}
+{% load static %}
+
+{% block head %}
+<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+{% endblock %}
+
+{% block title %}My Passwords{% endblock title %}
+
+{% block body %}
+    
+    <section class="content">
+        <h2>ALL THE ITENS - <span id="user">{{ user.username }}</span></h2>
+        <div class="box-content" id="box-item">
+         </div>
+    </section>
+
+    <script type="text/babel">
+
+        class Note extends React.Component {
+            state = {
+                editMode: false,
+                name: this.props.note.name,
+                content: this.props.note.note
+            }
+
+            render() {
+                return (
+                    <div className="card">
+                        <div className="info-img">
+                            <img src="{% static 'mypasswords/img/notesicon.jpg' %}" alt=""/>
+                        </div>
+                        {this.state.editMode ? 
+                            <>
+                                <div className="info-item-note">
+                                    <p 
+                                        className="name"
+                                        value={this.state.name}
+                                        onChange={this.handleChange('name')}
+                                    > <input type="text" name="" id="" value={this.state.name}/>
+                                    </p>
+
+                                    <p 
+                                        className="note"
+                                        value={this.state.content} 
+                                        onChange={this.handleChange('content')}
+                                    > <textarea rows="4" cols="40" value={this.state.content}></textarea>
+                                    </p>
+                                </div>
+                                <div className="info-edit-remove">
+                                    <p><button 
+                                        className="btn-save" 
+                                        onClick={this.handleSubmit}
+                                        disabled={this.state.name.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.content.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false}
+                                        >Save</button></p>
+                                </div>
+                            </> :
+                            <>
+                                <div className="info-item-note">
+                                    <p className="name">{this.state.name}</p>
+                                    <p className="note">{this.state.content}</p>
+                                </div>
+                                <div className="info-edit-remove">
+                                    <p><button className="btn-edit-remove" onClick={this.handleEdit}><img src="{% static 'mypasswords/img/editicon.png' %}" alt=""/></button></p>
+                                    <p><button className="btn-edit-remove" onClick={this.deleteData}><img src="{% static 'mypasswords/img/deleteicon.png' %}" alt=""/></button></p>
+                                </div>
+                            </>
+                        }        
+                    </div> 
+                );
+            }
+
+            deleteData = () => {
+
+                fetch(`api/notes/delete/${this.props.note.id}`, {
+                    method: 'DELETE',
+                })
+                .then(res => res.json())
+                .then(data => {console.log(data)})
+                .catch(error => console.log(error));
+
+                window.location.reload(false);
+            }
+
+            handleEdit = () => {
+                this.setState({editMode: true})
+            }
+            
+            handleChange(prop) {
+                return (event) => {
+                    this.setState({ [prop]: event.target.value })
+                }
+            }
+
+            handleSubmit = (event) => {
+
+                fetch(`api/notes/edit/${this.props.note.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: this.state.name,
+                        content: this.state.content
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    console.log(data)
+                    
+                    this.setState({editMode: false})
+                })
+                .catch(error => console.log(error));
+
+                event.preventDefault();
+            }
+        }
+
+        class Password extends React.Component {
+            state = {
+                editMode: false,
+                showPassword: false,
+                name: this.props.password.name,
+                login: this.props.password.login,
+                password: this.props.password.password,
+                link: this.props.password.link,
+            }
+
+            render() {
+                return (
+                    <div className="card">
+                        {this.state.editMode ? 
+                            <>
+                                <div className="info-img">
+                                    <img src="{% static 'mypasswords/img/passwordicon.jpg' %}" alt=""/>
+                                </div>
+                                <div className="info-item">
+                                    <p 
+                                        className="name"
+                                        value={this.state.name}
+                                        onChange={this.handleChange('name')}
+                                    > <input type="text" name="" id="" value={this.state.name}/>
+                                    </p>
+                                    <p className="username">Username:
+                                        <input type="text" name="" id="" onChange={this.handleChange('login')} value={this.state.login}/> 
+                                    </p>
+                                    <p className="password">Password:
+                                        <input type="text" name="" id="" onChange={this.handleChange('password')} value={this.state.password}/>                            
+                                    </p>
+                                    <p>Link: <input type="text" name="" id="" onChange={this.handleChange('link')} value={this.state.link}/></p>
+                                </div>
+                                <div className="info-edit-remove">
+                                    <p><button 
+                                        className="btn-save" 
+                                        onClick={this.handleSubmit}
+                                        disabled={this.state.name.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.login.trim().replace(/(\r\n|\n|\r)/gm,"") === "" || this.state.password.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false || this.state.link.trim().replace(/(\r\n|\n|\r)/gm,"") === "" ? true : false}
+                                        >Save</button></p>
+                                </div>
+                            </> :
+                            <>
+                                <div className="info-img">
+                                    <img src="{% static 'mypasswords/img/passwordicon.jpg' %}" alt=""/>
+                                </div>
+                                <div className="info-item">
+                                    <p className="name">{this.state.name}</p>
+                                    <p className="username">Username:
+                                        <input type="text" name="" id="" value={this.state.login}/>
+                                        <button onClick={() =>  navigator.clipboard.writeText(this.state.login)}>
+                                            <svg className="copy-img" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3334 0.708333H2.83341C2.05425 0.708333 1.41675 1.34583 1.41675 2.125V12.0417H2.83341V2.125H11.3334V0.708333ZM13.4584 3.54167H5.66675C4.88758 3.54167 4.25008 4.17917 4.25008 4.95833V14.875C4.25008 15.6542 4.88758 16.2917 5.66675 16.2917H13.4584C14.2376 16.2917 14.8751 15.6542 14.8751 14.875V4.95833C14.8751 4.17917 14.2376 3.54167 13.4584 3.54167ZM13.4584 14.875H5.66675V4.95833H13.4584V14.875Z" fill="#414141"/>
+                                            </svg>  
+                                        </button>
+                                    </p>
+                                    <p className="password">Password:
+                                        <input type={this.state.showPassword ? "text" : "password"} name="" id="" value={this.state.password}/>
+                                        <button onClick={this.togglePassword}><img src="{% static 'mypasswords/img/viewicon.png' %}" alt=""/></button>
+                                        <button onClick={() =>  navigator.clipboard.writeText(this.state.password)}>
+                                            <svg className="copy-img" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3334 0.708333H2.83341C2.05425 0.708333 1.41675 1.34583 1.41675 2.125V12.0417H2.83341V2.125H11.3334V0.708333ZM13.4584 3.54167H5.66675C4.88758 3.54167 4.25008 4.17917 4.25008 4.95833V14.875C4.25008 15.6542 4.88758 16.2917 5.66675 16.2917H13.4584C14.2376 16.2917 14.8751 15.6542 14.8751 14.875V4.95833C14.8751 4.17917 14.2376 3.54167 13.4584 3.54167ZM13.4584 14.875H5.66675V4.95833H13.4584V14.875Z" fill="#414141"/>
+                                            </svg>
+                                        </button>                           
+                                    </p>
+                                    <p>Link: <a target="_blank" href={"https://" + this.state.link}>{this.state.link}</a></p>
+                                </div>
+                                <div className="info-edit-remove">
+                                    <p><button className="btn-edit-remove" onClick={this.handleEdit}><img src="{% static 'mypasswords/img/editicon.png' %}" alt=""/></button></p>
+                                    <p><button className="btn-edit-remove" onClick={this.deleteData}><img src="{% static 'mypasswords/img/deleteicon.png' %}" alt=""/></button></p>
+                                </div>
+                            </>
+                        }
+                    </div>
+                );
+            }
+
+            deleteData = () => {
+
+                fetch(`api/passwords/delete/${this.props.password.id}`, {
+                    method: 'DELETE',
+                })
+                .then(res => res.json())
+                .then(data => {console.log(data)})
+                .catch(error => console.log(error));
+
+                window.location.reload(false);
+            }
+
+            togglePassword = () => {
+                this.setState({showPassword: !this.state.showPassword})
+            };
+
+            handleEdit = () => {
+                this.setState({editMode: true})
+            }
+            
+            handleChange(prop) {
+                return (event) => {
+                    this.setState({ [prop]: event.target.value })
+                }
+            }
+
+            handleSubmit = (event) => {
+                fetch(`api/passwords/edit/${this.props.password.id}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        name: this.state.name,
+                        login: this.state.login,
+                        password: this.state.password,
+                        link: this.state.link
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+
+                    console.log(data)
+                    
+                    this.setState({editMode: false})
+                })
+                .catch(error => console.log(error));
+
+                event.preventDefault();
+            }
+
+        }
+
+
+        class AllItens extends React.Component { 
+            
+            state = {
+                notes: [],
+                passwords: [],
+                inputText: ""
+            };
+
+            render() {
+                if (this.state.notes.length != 0 || this.state.passwords.length != 0) {
+                    
+                    return (
+                        <>
+                        <div class="search-new">
+                            <input type="text" class="search" onChange={this.inputHandler('inputText')}/>
+                            <a href="{% url 'new' %}" class="new-button">+NEW</a>
+                        </div>
+                        <div className="boarder-box">
+                            {this.state.notes.filter((note) => {
+                                if (this.state.inputText == "") {
+                                    return note
+                                }
+                                else if (note.name.toLowerCase().includes(this.state.inputText.toLowerCase())) {
+                                    return note
+                                }
+                             }).map((note) => (
+                                <Note 
+                                    key={note.id} 
+                                    note={note} 
+                                    username={this.props.username}
+                                />
+                            ))}
+                            {this.state.passwords.filter((password) => {
+                                if (this.state.inputText == "") {
+                                    return password
+                                }
+                                else if (password.name.toLowerCase().includes(this.state.inputText.toLowerCase())) {
+                                    return password
+                                }
+                             }).map((password) => (
+                                <Password 
+                                    key={password.id} 
+                                    password={password} 
+                                    username={this.props.username}
+                                />
+                            ))}
+                        </div>
+                        </>
+                    );
+                    
+                }
+                else {
+                    return (
+                        <>
+                            <div class="search-new">
+                                <input type="text" class="search" onChange={this.inputHandler('inputText')}/>
+                                <a href="{% url 'new' %}" class="new-button">+NEW</a>
+                            </div>
+                            <div className="empty">
+                                <img src="{% static 'mypasswords/img/secureimg2.png' %}" alt=""/>
+                                <h2>THERE IS NOTHING TO SHOW HERE</h2>
+                            </div>
+                        </>
+                    );
+                }
+            }
+
+            inputHandler(prop) {
+                return (event) => {
+                    this.setState({ [prop]: event.target.value.toLowerCase() })
+                }
+            }
+        
+            loadPage = () => {
+
+                fetch(`api/allitens`)
+                .then(response => response.json())
+                .then(data => {
+
+                    console.log(data)
+
+                    this.setState({notes: data.notes, passwords: data.passwords})
+                })
+                .catch(error => console.log(error));
+            }
+
+            componentDidMount() {
+                this.loadPage();
+            }
+        }
+
+        class App extends React.Component {     
+
+            render() {
+                if (this.props.username != null) {
+                    return (
+                        <AllItens username={this.props.username} />
+                    );
+                }
+                else {
+                    return (
+                        <div className="empty">
+                            <img src="{% static 'mypasswords/img/secureimg2.png' %}" alt=""/>
+                            <h2>THERE IS NOTHING TO SHOW HERE</h2>
+                        </div>
+                    );
+                }
+
+            }
+        }
+
+        ReactDOM.render(
+            <App
+                username={
+                    document.querySelector('#user') ? 
+                    document.querySelector('#user').innerHTML : 
+                    null
+                }
+            />,
+            document.querySelector('#box-item')
+        );
+
+    </script>
+{% endblock body %}

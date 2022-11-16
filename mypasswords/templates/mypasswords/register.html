@@ -1,0 +1,55 @@
+{% extends "mypasswords/_layout-index.html" %}
+{% load static %}
+
+{% block title %}My Passwords{% endblock title %}
+
+{% block body %}
+    <header>
+        <nav class="navbar">
+            <a class="logo" href="{% url 'index' %}">My Passwords</a>
+            <ul class="navbar-right">
+                <li><a href="{% url 'login' %}">LOGIN</a></li>
+                <li><a class="active" href="#">REGISTER</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="index">
+        <div class="text">
+            <h1>FORGOT YOUR PASSWORD?</h1>
+            <h2>Try My Passwords to store your passwords securely.</h2>
+        </div>
+        <div class="box-form">
+            {% if user.is_authenticated %}
+                <h3>You are already connected!</h3>
+                <p class="btn-logout"><a href="{% url 'logout' %}">LOG OUT</a></p>
+            {% else %}
+                <h3>REGISTER</h3>
+                {% if message %}
+                <div>{{ message }}</div>
+                {% endif %}
+                <div class="box-user">
+                    <form action="{% url 'register' %}" method="post">
+                        {% csrf_token %}
+                        <p><input type="text" name="username" id="" placeholder="Username"></p>
+                        <p><input type="password" name="password" id="" placeholder="Password"></p>
+                        <p><input type="text" name="email" id="" placeholder="E-mail"></p>
+                        <p><input type="submit" value="Register"></p>               
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="info">
+        <h3>PASSWORD MANAGEMENT</h3>
+        <div class="infoimgs">
+            <div>
+                <img src="{% static 'mypasswords/img/easyimg.png' %}" alt="">
+                <h4>Easy</h4>
+            </div>
+            <div>
+                <img src="{% static 'mypasswords/img/secureimg.png' %}" alt="">
+                <h4>Secure</h4>
+            </div>
+        </div>
+    </div>
+{% endblock body %}

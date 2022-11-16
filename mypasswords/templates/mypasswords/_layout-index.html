@@ -1,0 +1,26 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" type="image/png" href="{% static 'mypasswords/favicon.png' %}"/>
+    <!-- Styles -->
+    <link href="{% static 'mypasswords/styles.css' %}" rel="stylesheet">
+    <!-- Head block -->
+    {% block head %}{% endblock %}
+    <!-- Title Block --> 
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+    <!-- Body Block --> 
+    {% block body %}
+    {% endblock %}
+    <footer>
+        <div class="logo">My Passwords</div>
+        <span>2022</span>
+    </footer>
+</body>
+</html>
